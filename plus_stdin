@@ -11,6 +11,7 @@ def tonum(s):   #def 関数の名前(引数)で関数を定義
     except ValueError:
         return float(s)
 
+x = 0
 for line in sys.stdin:
     x += tonum(line.rstrip())
 
