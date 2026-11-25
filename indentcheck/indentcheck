@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Kanato Aketagawa
+# SPDX-License-Identifier: BSD-3-Clause
+
+import sys
+import io
+import tokenize
+
+def check_indent(source):
+    try:
+        tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+
+        for token in tokens:
+            if token.type == tokenize.INDENT:
+                if "\t" in token.string:
+                    print(f"Line {token.start[0]}: Tab indentation detected.")
+                elif len(token.string) % 4 != 0:
+                    print(f"Line {token.start[0]}: Indentation is not a multiple of 4.")
+
+    except (tokenize.TokenError, IndentationError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    source = sys.stdin.read()
+    sys.exit(check_indent(source))
