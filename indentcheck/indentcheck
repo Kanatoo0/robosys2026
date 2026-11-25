@@ -13,15 +13,13 @@ def check_indent(source):
         if line.strip() == "":
             continue
 
-        # 行頭の空白とタブを取得
-        leading = line[:len(line) - len(line.lstrip(" \t"))]
 
+        leading = line[:len(line) - len(line.lstrip(" \t"))]
 
         if "\t" in leading:
             errors.append(f"Line {i}: Tab detected.")
             continue
 
-        # インデントの幅を確認
         indent = len(leading)
 
         if indent % 4 != 0:
@@ -29,10 +27,15 @@ def check_indent(source):
                 f"Line {i}: Indentation is not a multiple of 4."
             )
 
-    # エラーの表示
     for error in errors:
         print(error, file=sys.stderr)
 
+    if errors:
+        print(f"{len(errors)} indentation error(s) found.", file=sys.stderr)
+    else:
+        print("No indentation errors found.", file=sys.stderr)
+
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":
