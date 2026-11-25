@@ -1,0 +1,25 @@
+
+name: indentcheck tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Get repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check executable permission
+        run: test -x ./indentcheck
+
+      - name: Run tests
+        run: python3 -m unittest -v test_indentcheck.py
