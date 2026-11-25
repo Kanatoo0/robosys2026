@@ -39,6 +39,13 @@ def main():
 
             time.sleep(1)
 
+    elif sys.argv[1] == "list":
+        with open(FILE) as f:
+            history = json.load(f)
+
+        for i, text in enumerate(history, 1):
+            print(i, text)
+
 if __name__ == "__main__":
     main()
 
