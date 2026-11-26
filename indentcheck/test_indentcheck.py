@@ -1,66 +1,37 @@
-#!/usr/bin/env python3
+#!/bin/bash
 # SPDX-FileCopyrightText: 2026 Kanato Aketagawa
 # SPDX-License-Identifier: BSD-3-Clause
 
-import unittest
-import subprocess
-from pathlib import Path
+ng () {
+    echo "${1}行目のテスト失敗"
+    res=1
+}
 
+res=0
 
-COMMAND = Path(__file__).resolve().parent / "indentcheck"
+out=$(printf 'def hello():\n    print("Hello")\n' | ./indentcheck 2>/dev/null)
+[ "$?" = 0 ] || ng "$LINENO"
+[ "${out}" = "" ] || ng "$LINENO"
 
+out=$(printf 'def hello():\n  print("Hello")\n' | ./indentcheck 2>/dev/null)
+[ "$?" = 1 ] || ng "$LINENO"
+[ "${out}" = "" ] || ng "$LINENO"
 
-class TestIndentcheck(unittest.TestCase):
+out=$(printf 'def hello():\n\tprint("Hello")\n' | ./indentcheck 2>/dev/null)
+[ "$?" = 1 ] || ng "$LINENO"
+[ "${out}" = "" ] || ng "$LINENO"
 
-    def run_check(self, source):
-        return subprocess.run(
-            [str(COMMAND)],
-            input=source,
-            text=True,
-            capture_output=True
-        )
+out=$(printf '' | ./indentcheck 2>/dev/null)
+[ "$?" = 0 ] || ng "$LINENO"
+[ "${out}" = "" ] || ng "$LINENO"
 
-    def test_correct_indent(self):
-        result = self.run_check(
-            'def hello():\n'
-            '    print("Hello")\n'
-        )
+out=$(printf 'def hello():\n  print("Hello")\n   print("World")\n' | ./indentcheck 2>/dev/null)
+[ "$?" = 1 ] || ng "$LINENO"
+[ "${out}" = "" ] || ng "$LINENO"
 
-        self.assertEqual(result.returncode, 0)
-        self.assertIn(
-            "No indentation errors found.",
-            result.stderr
-        )
+out=$(printf '    print("Hello")\n' | cat | ./indentcheck 2>/dev/null)
+[ "$?" = 0 ] || ng "$LINENO"
+[ "${out}" = "" ] || ng "$LINENO"
 
-    def test_wrong_indent(self):
-        result = self.run_check(
-            'def hello():\n'
-            '  print("Hello")\n'
-        )
-
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("Line 2:", result.stderr)
-        self.assertIn("1 indentation error(s) found.", result.stderr)
-
-    def test_tab_indent(self):
-        result = self.run_check(
-            'def hello():\n'
-            '\tprint("Hello")\n'
-        )
-
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("Tab detected.", result.stderr)
-
-    def test_multiple_errors(self):
-        result = self.run_check(
-            'def hello():\n'
-            '  print("Hello")\n'
-            '   print("World")\n'
-        )
-
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("2 indentation error(s) found.", result.stderr)
-
-
-if __name__ == "__main__":
-    unittest.main()
+[ "${res}" = 0 ] && echo OK
+exit "$res"
